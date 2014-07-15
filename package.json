@@ -1,0 +1,28 @@
+{
+  "name": "browser-workshopper-exercise",
+  "version": "0.0.0",
+  "description": "The exercise module for the browser workshopper framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cameron Lakenen <cameron@lakenen.com>",
+  "license": "MIT",
+  "dependencies": {
+    "google-fonts": "0.0.0",
+    "highlight.js": "^8.1.0",
+    "marked": "^0.3.2",
+    "remove-element": "0.0.0",
+    "sliced": "0.0.5",
+    "xhr": "^1.13.0"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lakenen/browser-workshopper-exercise.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lakenen/browser-workshopper-exercise/issues"
+  },
+  "homepage": "https://github.com/lakenen/browser-workshopper-exercise"
+}
