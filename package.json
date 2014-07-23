@@ -8,6 +8,9 @@
   },
   "author": "Cameron Lakenen <cameron@lakenen.com>",
   "license": "MIT",
+  "browserify": {
+    "transform": [ "brfs" ]
+  },
   "dependencies": {
     "browser-workshopper-progress": "0.0.0",
     "browser-workshopper-sidebar": "0.0.0",

@@ -1,12 +1,15 @@
 var progress    = require('browser-workshopper-progress')
-var sidebar     = require('browser-workshopper-sidebar')
+  , sidebar     = require('browser-workshopper-sidebar')
+  , highlight   = require('highlight.js').highlight
+  , remove      = require('remove-element')
+  , fonts       = require('google-fonts')
+  , slice       = require('sliced')
+  , marked      = require('marked')
+  , xhr         = require('xhr')
 
-var highlight   = require('highlight.js').highlight
-var remove      = require('remove-element')
-var fonts       = require('google-fonts')
-var slice       = require('sliced')
-var marked      = require('marked')
-var xhr         = require('xhr')
+var fs          = require('fs')
+
+var html = fs.readFileSync(__dirname + '/index.html', 'utf8')
 
 var renderer = new marked.Renderer();
 var anchorRender = {
@@ -35,8 +38,10 @@ var buttons = document.body.appendChild(document.createElement('ul'))
   , openBtn = buttons.appendChild(document.createElement('li'))
 
 module.exports = function(ex) {
+  setupPage()
   setupNotifications()
   setupButtons()
+
 
   fonts.add({
     'Source Code Pro': [200, 600]
@@ -54,9 +59,10 @@ module.exports = function(ex) {
   }
 
   if (ex.success) {
-    var success = document.body.appendChild(document.createElement('div'))
-    success.classList.add('success-msg')
+    var success = document.querySelector('.success-msg')
     success.innerHTML = marked(ex.success)
+  } else {
+    remove(document.querySelector('.success-container'))
   }
 
   var hamburger = side.el.querySelector('.bw-sidebar-hide')
@@ -158,4 +164,28 @@ function setupButtons() {
       if (err) throw err
     })
   }, false)
+}
+
+function hasClass(el, c) {
+  return el.classList.contains(c)
+}
+
+function contains(el, child) {
+  do {
+    if (child === el) return true
+  } while ((child = child.parentNode))
+  return false
+}
+
+function setupPage() {
+  var container = document.createElement('div')
+  container.innerHTML = html
+  document.body.appendChild(container)
+  var successEl = container.querySelector('.success-msg')
+  container.addEventListener('click', function (ev) {
+    if (contains(successEl, ev.target)) {
+      return
+    }
+    document.body.classList.remove('success')
+  })
 }
