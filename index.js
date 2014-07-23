@@ -7,24 +7,34 @@ var fonts       = require('google-fonts')
 var slice       = require('sliced')
 var marked      = require('marked')
 var xhr         = require('xhr')
-var fs          = require('fs')
 
-var markedOpts = {
-  highlight: function(code, lang) {
-    if (!lang) return code
-
-    code = highlight(lang, code).value
-    return code
-  }
+var renderer = new marked.Renderer();
+var anchorRender = {
+    options:{
+      sanitize: true
+    }
+  , render: marked.Renderer.prototype.link
+};
+// open links in new window
+renderer.link = function(href, title, text){
+  var anchor = anchorRender.render(href, title, text);
+  return anchor.replace('<a', '<a target="_blank"');
 }
+marked.setOptions({
+    renderer: renderer
+  , highlight: function(code, lang) {
+      if (!lang) return code
+
+      code = highlight(lang, code).value
+      return code
+    }
+})
 
 var buttons = document.body.appendChild(document.createElement('ul'))
   , homeBtn = buttons.appendChild(document.createElement('li'))
   , openBtn = buttons.appendChild(document.createElement('li'))
 
-module.exports = function(opts) {
-  opts = opts || {}
-
+module.exports = function(ex) {
   setupNotifications()
   setupButtons()
 
@@ -34,37 +44,53 @@ module.exports = function(opts) {
 
   var side = sidebar()
 
-  if (opts.description) {
-    side.content.innerHTML = marked(opts.description, markedOpts)
+  if (ex.title) {
+    document.title = ex.title
+  }
+
+  if (ex.description) {
+    side.content.innerHTML = marked(ex.description)
     openHook(side.content)
   }
 
-  var hamburger = side.el.querySelector('.browser-workshopper-hide')
+  if (ex.success) {
+    var success = document.body.appendChild(document.createElement('div'))
+    success.classList.add('success-msg')
+    success.innerHTML = marked(ex.success)
+  }
+
+  var hamburger = side.el.querySelector('.bw-sidebar-hide')
 
   hamburger.classList.add('flashing')
   hamburger.addEventListener('click', function() {
     hamburger.classList.remove('flashing')
   }, false)
 
-  side.on('test', function() {
-    if (!opts.test) {
-      return console.warn('No test function specified for this lesson yet...')
-    }
-
-    opts.test(function(err, result) {
-      if (err) throw err
-
-      if (result) {
-        progress.set(opts.dirname, true)
-        side.status = 'passed!'
-        side.statusColor = '#57FF8A'
-        homeBtn.classList.add('flashing')
-      } else {
-        side.status = 'try again?'
-        side.statusColor = '#FF6E57'
+  function init() {
+    side.on('test', function() {
+      if (!ex.test) {
+        return console.warn('No test function specified for this lesson yet...')
       }
+
+      ex.test(function(err, result) {
+        if (result) {
+          progress.set(ex.dirname, true)
+          side.pass('passed!')
+          document.body.classList.add('success')
+          homeBtn.classList.add('flashing')
+        } else {
+          side.fail('try again?')
+        }
+        if (err) throw err
+      })
     })
-  })
+  }
+
+  if (ex.setup) {
+    ex.setup(init)
+  } else {
+    init();
+  }
 }
 
 function setupNotifications() {
