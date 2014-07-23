@@ -73,12 +73,16 @@ module.exports = function(ex) {
   }, false)
 
   function init() {
+    var timeoutTID, testingTID;
     side.on('test', function() {
       if (!ex.test) {
         return console.warn('No test function specified for this lesson yet...')
       }
-
+      clearTimeout(timeoutTID)
+      side.reset()
       ex.test(function(err, result) {
+        clearTimeout(timeoutTID)
+        clearTimeout(testingTID)
         if (result) {
           progress.set(ex.dirname, true)
           side.pass('passed!')
@@ -89,6 +93,12 @@ module.exports = function(ex) {
         }
         if (err) throw err
       })
+      testingTID = setTimeout(function () {
+        side.status = 'testing...'
+      }, 100)
+      timeoutTID = setTimeout(function () {
+        side.fail('timeout :(')
+      }, ex.testTimeout || 5000)
     })
   }
 
