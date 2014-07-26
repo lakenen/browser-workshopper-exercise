@@ -91,7 +91,7 @@ module.exports = function(ex) {
         } else {
           side.fail('try again?')
         }
-        if (err) throw err
+        if (err) throw (err.message ? err : new Error(err))
       })
       testingTID = setTimeout(function () {
         side.status = 'testing...'
