@@ -86,8 +86,11 @@ module.exports = function(ex) {
         if (result) {
           progress.set(ex.dirname, true)
           side.pass('passed!')
-          document.body.classList.add('success')
-          homeBtn.classList.add('flashing')
+          timeoutTID = setTimeout(function () {
+            document.body.classList.add('success')
+            homeBtn.classList.add('flashing')
+            side.enabled = false
+          }, 1000)
         } else {
           side.fail('try again?')
         }
