@@ -99,9 +99,11 @@ module.exports = function(ex) {
       testingTID = setTimeout(function () {
         side.status = 'testing...'
       }, 100)
-      timeoutTID = setTimeout(function () {
-        side.fail('timeout :(')
-      }, ex.testTimeout || 5000)
+      if (ex.testTimeout !== false) {
+        timeoutTID = setTimeout(function () {
+          side.fail('timeout :(')
+        }, ex.testTimeout || 5000)
+      }
     })
   }
 
