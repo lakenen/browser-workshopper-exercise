@@ -12,8 +12,8 @@
     "transform": [ "brfs" ]
   },
   "dependencies": {
-    "browser-workshopper-progress": "0.0.0",
-    "browser-workshopper-sidebar": "0.0.0",
+    "browser-workshopper-progress": "https://github.com/lakenen/browser-workshopper-progress/tarball/wip",
+    "browser-workshopper-sidebar": "https://github.com/lakenen/browser-workshopper-sidebar/tarball/wip",
     "google-fonts": "0.0.0",
     "highlight.js": "^8.1.0",
     "marked": "^0.3.2",
