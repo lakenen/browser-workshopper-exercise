@@ -41,7 +41,8 @@ module.exports = function(ex) {
   setupSliders()
 
   fonts.add({
-    'Source Code Pro': [200, 600]
+      'Source Code Pro': [200, 600]
+    , 'Share Tech Mono': [400]
   })
 
   var side = sidebar()
@@ -49,6 +50,8 @@ module.exports = function(ex) {
   if (ex.title) {
     document.title = ex.title
   }
+
+  document.body.classList.add(ex.dirname)
 
   if (ex.description) {
     side.content.innerHTML = marked(ex.description)
@@ -184,16 +187,17 @@ function contains(el, child) {
 }
 
 function setupPage() {
-  var container = document.createElement('div')
-  container.innerHTML = html
-  document.body.appendChild(container)
-  var successEl = container.querySelector('.success-msg')
-  container.addEventListener('click', function (ev) {
+  var successEl = document.querySelector('.success-msg')
+    , button = document.querySelector('.success-hide-btn')
+  document.addEventListener('click', function (ev) {
     if (contains(successEl, ev.target)) {
       return
     }
     document.body.classList.remove('success')
-  })
+  }, false)
+  button.addEventListener('click', function (ev) {
+    document.body.classList.remove('success')
+  }, false)
 }
 
 // homeBtn/openBtn Buttons
@@ -237,13 +241,13 @@ function setupSliders() {
   function resetColumn() {
     sidebar.style.maxWidth = ''
     sidebar.style.minWidth = ''
-    progress.set('column-position', null)
+    progress.unset('column-position')
   }
 
   function resetRow() {
     display.style.maxHeight = ''
     display.style.minHeight = ''
-    progress.set('row-position', null)
+    progress.unset('row-position')
   }
 
   slideColumnTo(colPos)
