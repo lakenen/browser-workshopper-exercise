@@ -1,6 +1,7 @@
 var progress    = require('browser-workshopper-progress')
   , sidebar     = require('browser-workshopper-sidebar')
   , highlight   = require('highlight.js').highlight
+  , apprise     = require('apprise')
   , remove      = require('remove-element')
   , fonts       = require('google-fonts')
   , slice       = require('sliced')
@@ -33,15 +34,11 @@ marked.setOptions({
     }
 })
 
-var buttons = document.body.appendChild(document.createElement('ul'))
-  , homeBtn = buttons.appendChild(document.createElement('li'))
-  , openBtn = buttons.appendChild(document.createElement('li'))
-
 module.exports = function(ex) {
   setupPage()
   setupNotifications()
   setupButtons()
-
+  setupSliders()
 
   fonts.add({
     'Source Code Pro': [200, 600]
@@ -84,11 +81,11 @@ module.exports = function(ex) {
         clearTimeout(timeoutTID)
         clearTimeout(testingTID)
         if (result) {
-          progress.set(ex.dirname, true)
+          progress.setProgress(ex.dirname, true)
           side.pass('passed!')
           timeoutTID = setTimeout(function () {
             document.body.classList.add('success')
-            homeBtn.classList.add('flashing')
+            // homeBtn.classList.add('flashing')
             side.enabled = false
           }, 1000)
         } else {
@@ -115,9 +112,9 @@ module.exports = function(ex) {
 }
 
 function setupNotifications() {
-  var notify = require('apprise')({
+  var notify = apprise({
     top: false,
-    right: true
+    right: false
   }).on('enter', function(node) {
     node.classList.add('notification')
   }).on('exit', function(node) {
@@ -162,22 +159,16 @@ function openHook(content) {
 
 // homeBtn/openBtn Buttons
 function setupButtons() {
-  buttons.classList.add('buttons')
-  homeBtn.classList.add('button-home')
-  openBtn.classList.add('button-open')
-
-  homeBtn.setAttribute('title', 'Return to menu')
-  homeBtn.addEventListener('click', function(e) {
-    window.location = '/'
-  }, false)
-
-  openBtn.setAttribute('title', 'open exercise solution directory')
-  openBtn.addEventListener('click', function(e) {
-    var src = '/open' + window.location.pathname
-
-    xhr(src, function(err) {
-      if (err) throw err
-    })
+  var toggleButtons = document.querySelector('.toggle-buttons')
+  function togglePane(name, disabled) {
+    document.body.classList.toggle(name + '-disabled', disabled)
+  }
+  toggleButtons.addEventListener('click', function(event) {
+    var btn = event.target
+    if (btn.classList.contains('toggle')) {
+      btn.classList.toggle('disabled')
+      togglePane(btn.dataset.toggle, btn.classList.contains('disabled'))
+    }
   }, false)
 }
 
@@ -203,4 +194,89 @@ function setupPage() {
     }
     document.body.classList.remove('success')
   })
+}
+
+// homeBtn/openBtn Buttons
+function setupSliders() {
+  var sliderColumn = document.querySelector('.slider-column')
+    , sliderRow = document.querySelector('.slider-row')
+    , sidebar = document.querySelector('.sidebar')
+    , display = document.querySelector('.display')
+
+  sliderColumn.addEventListener('mousedown', startColumnSliding, false)
+  sliderRow.addEventListener('mousedown', startRowSliding, false)
+
+  sliderColumn.addEventListener('dblclick', resetColumn, false)
+  sliderRow.addEventListener('dblclick', resetRow, false)
+
+  var minRow = display.offsetTop + 80
+    , minCol = 80
+
+  var colPos = progress.get('column-position')
+    , rowPos = progress.get('row-position')
+
+  function slideColumnTo(x) {
+    if (!x) return
+    var max = window.innerWidth - 80
+    x = Math.min(max, Math.max(minCol, x))
+    sidebar.style.maxWidth = (x - 2) + 'px'
+    sidebar.style.minWidth = (x - 2) + 'px'
+    colPos = x
+    progress.set('column-position', x)
+  }
+  function slideRowTo(y) {
+    if (!y) return
+    var max = window.innerHeight - display.offsetTop - 80
+    y = Math.min(max, Math.max(minRow, y))
+    display.style.maxHeight = (y - 2) + 'px'
+    display.style.minHeight = (y - 2) + 'px'
+    rowPos = y
+    progress.set('row-position', y)
+  }
+
+  function resetColumn() {
+    sidebar.style.maxWidth = ''
+    sidebar.style.minWidth = ''
+    progress.set('column-position', null)
+  }
+
+  function resetRow() {
+    display.style.maxHeight = ''
+    display.style.minHeight = ''
+    progress.set('row-position', null)
+  }
+
+  slideColumnTo(colPos)
+  slideRowTo(rowPos)
+
+  window.addEventListener('resize', function () {
+    slideRowTo(rowPos)
+    slideColumnTo(colPos)
+  })
+
+  function startColumnSliding() {
+    function move(event) {
+      slideColumnTo(event.clientX)
+      event.preventDefault()
+    }
+    function up(event) {
+      document.removeEventListener('mousemove', move)
+      document.removeEventListener('mouseup', up)
+    }
+    document.addEventListener('mousemove', move, false)
+    document.addEventListener('mouseup', up, false)
+  }
+
+  function startRowSliding() {
+    function move(event) {
+      slideRowTo(event.clientY - display.offsetTop)
+      event.preventDefault()
+    }
+    function up(event) {
+      document.removeEventListener('mousemove', move)
+      document.removeEventListener('mouseup', up)
+    }
+    document.addEventListener('mousemove', move, false)
+    document.addEventListener('mouseup', up, false)
+  }
 }
