@@ -65,12 +65,12 @@ module.exports = function(ex) {
     remove(document.querySelector('.success-container'))
   }
 
-  var hamburger = side.el.querySelector('.bw-sidebar-hide')
+  // var hamburger = side.el.querySelector('.bw-sidebar-hide')
 
-  hamburger.classList.add('flashing')
-  hamburger.addEventListener('click', function() {
-    hamburger.classList.remove('flashing')
-  }, false)
+  // hamburger.classList.add('flashing')
+  // hamburger.addEventListener('click', function() {
+  //   hamburger.classList.remove('flashing')
+  // }, false)
 
   function init() {
     var timeoutTID, testingTID;
